@@ -221,7 +221,8 @@ class _MeasurementsState extends State<Measurements> {
 
   _MeasurementsState(this._station);
 
-  ListTile _buildItemsForListView(BuildContext context, int index) {
+  ExpansionTile _buildItemsForListViewExpandable(
+      BuildContext context, int index) {
     if (_measurements[index] == null) {
       return null;
     }
@@ -229,19 +230,54 @@ class _MeasurementsState extends State<Measurements> {
     final Measurement m = _measurements[index];
     final DateTime timeStamp =
         DateTime.fromMillisecondsSinceEpoch(m.date * 1000);
-    return ListTile(
+    return ExpansionTile(
       subtitle: Text(timeago.format(timeStamp)),
       title: Text(
         m.temp.average.toString() + ' °C',
         style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
       ),
-      trailing: Icon(Icons.keyboard_arrow_right),
-      onTap: () {
-        Navigator.of(context)
-            .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-          return MeasurementDetail(measurement: _measurements[index]);
-        }));
-      },
+      children: [
+        ListTile(
+          leading: Icon(Icons.wb_sunny),
+          title: Text('Temperature'),
+          subtitle: Text('min: ' +
+              m.temp.min.toString() +
+              ' °C' +
+              ' / ' +
+              'max: ' +
+              m.temp.max.toString() +
+              ' °C'),
+          trailing: Text(m.temp.average.toString() + ' °C'),
+        ),
+        ListTile(
+          leading: Icon(Icons.opacity),
+          title: Text('Rel. Humidity'),
+          trailing: Text(m.humidity.average.toString() + ' %'),
+        ),
+        ListTile(
+          leading: Icon(Icons.outlined_flag),
+          title: Text('Wind'),
+          subtitle: Text('direction: ' + m.wind.deg.toString() + '°'),
+          trailing: Text(m.wind.speed.toString() + ' km/h'),
+        ),
+        ListTile(
+          leading: Icon(Icons.public),
+          title: Text('Pressure'),
+          subtitle: Text('min: ' +
+              m.pressure.min.toString() +
+              ' hPa' +
+              ' / ' +
+              'max: ' +
+              m.pressure.max.toString() +
+              ' hPa'),
+          trailing: Text(m.pressure.average.toString() + ' hPa'),
+        ),
+        ListTile(
+          leading: Icon(Icons.cloud),
+          title: Text('Precipitation'),
+          trailing: Text(m.precipitation.rain.toString() + ' mm'),
+        )
+      ],
     );
   }
 
@@ -252,85 +288,9 @@ class _MeasurementsState extends State<Measurements> {
         title: Text('Measurements (${_station.externalID})'),
       ),
       body: ListView.builder(
-        itemBuilder: _buildItemsForListView,
+        itemBuilder: _buildItemsForListViewExpandable,
         itemCount: _measurements.length,
       ),
     );
-  }
-}
-
-class MeasurementDetail extends StatefulWidget {
-  final Measurement measurement;
-
-  const MeasurementDetail({Key key, @required this.measurement})
-      : super(key: key);
-
-  @override
-  _MeasurementDetailState createState() =>
-      _MeasurementDetailState(this.measurement);
-}
-
-class _MeasurementDetailState extends State<MeasurementDetail> {
-  final Measurement m;
-
-  _MeasurementDetailState(this.m);
-
-  @override
-  Widget build(BuildContext context) {
-    final DateTime timeStamp =
-        DateTime.fromMillisecondsSinceEpoch(m.date * 1000);
-
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(timeago.format(timeStamp)),
-        ),
-        body: ListView(
-          children: ListTile.divideTiles(
-            context: context,
-            tiles: [
-              // TODO some things might be null and should not be displayed then
-              ListTile(
-                leading: Icon(Icons.wb_sunny),
-                title: Text('Temperature'),
-                subtitle: Text('min: ' +
-                    m.temp.min.toString() +
-                    ' °C' +
-                    ' / ' +
-                    'max: ' +
-                    m.temp.max.toString() +
-                    ' °C'),
-                trailing: Text(m.temp.average.toString() + ' °C'),
-              ),
-              ListTile(
-                leading: Icon(Icons.opacity),
-                title: Text('Rel. Humidity'),
-                trailing: Text(m.humidity.average.toString() + ' %'),
-              ),
-              ListTile(
-                leading: Icon(Icons.outlined_flag),
-                title: Text('Wind'),
-                subtitle: Text('direction: ' + m.wind.deg.toString() + '°'),
-                trailing: Text(m.wind.speed.toString() + ' km/h'),
-              ),
-              ListTile(
-                leading: Icon(Icons.public),
-                title: Text('Pressure'),
-                subtitle: Text('min: ' +
-                    m.pressure.min.toString() +
-                    ' hPa' +
-                    ' / ' +
-                    'max: ' +
-                    m.pressure.max.toString() +
-                    ' hPa'),
-                trailing: Text(m.pressure.average.toString() + ' hPa'),
-              ),
-              ListTile(
-                leading: Icon(Icons.cloud),
-                title: Text('Precipitation'),
-                trailing: Text(m.precipitation.rain.toString() + ' mm'),
-              )
-            ],
-          ).toList(),
-        ));
   }
 }
