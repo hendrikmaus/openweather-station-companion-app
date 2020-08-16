@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class Station {
@@ -16,15 +17,11 @@ class Station {
   String updatedAt;
   int rank;
 
-  Station(this.externalID,
-      this.name,
-      this.latitude,
-      this.longitude,
-      this.altitude);
+  Station(
+      this.externalID, this.name, this.latitude, this.longitude, this.altitude);
 
   // ToJson yields the required structure to create/update stations
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'external_id': this.externalID,
         'name': this.name,
         'latitude': this.latitude,
@@ -33,18 +30,123 @@ class Station {
       };
 
   Station.fromJson(Map<String, dynamic> json)
-    : id = json['id'],
-      name = json['name'],
-      createdAt = json['created_at'],
-      updatedAt = json['updated_at'],
-      externalID = json['external_id'],
-      latitude = json['latitude'],
-      longitude = json['longitude'],
-      altitude = json['altitude'],
-      rank = json['rank'];
+      : id = json['id'],
+        name = json['name'],
+        createdAt = json['created_at'],
+        updatedAt = json['updated_at'],
+        externalID = json['external_id'],
+        latitude = json['latitude'],
+        longitude = json['longitude'],
+        altitude = json['altitude'],
+        rank = json['rank'];
+}
+
+class MeasurementTemperature {
+  final double max;
+  final double min;
+  final double average;
+  final int weight;
+
+  MeasurementTemperature(this.max, this.min, this.average, this.weight);
+
+  MeasurementTemperature.fromJson(Map<String, dynamic> json)
+      : max = json['max'] is int ? (json['max'] as int).toDouble() : json['max'],
+        min = json['min'] is int ? (json['min'] as int).toDouble() : json['min'],
+        average = json['average'] is int ? (json['average'] as int).toDouble() : json['average'],
+        weight = json['weight'];
+}
+
+class MeasurementHumidity {
+  final double average;
+  final int weight;
+
+  MeasurementHumidity(this.average, this.weight);
+
+  MeasurementHumidity.fromJson(Map<String, dynamic> json)
+      : average = json['average'] is int ? (json['average'] as int).toDouble() : json['average'],
+        weight = json['weight'];
+}
+
+class MeasurementWind {
+  final int deg;
+  final double speed;
+
+  MeasurementWind(this.deg, this.speed);
+
+  MeasurementWind.fromJson(Map<String, dynamic> json)
+      : deg = json['deg'],
+        speed = json['speed'] is int ? (json['speed'] as int).toDouble() : json['speed'];
+}
+
+class MeasurementPressure {
+  final double max;
+  final double min;
+  final double average;
+  final int weight;
+
+  MeasurementPressure(this.max, this.min, this.average, this.weight);
+
+  MeasurementPressure.fromJson(Map<String, dynamic> json)
+      : max = json['max'] is int ? (json['max'] as int).toDouble() : json['max'],
+        min = json['min'] is int ? (json['min'] as int).toDouble() : json['min'],
+        average = json['average'] is int ? (json['average'] as int).toDouble() : json['average'],
+        weight = json['weight'];
+}
+
+class MeasurementPrecipitation {
+  final double rain;
+
+  MeasurementPrecipitation(this.rain);
+
+  MeasurementPrecipitation.fromJson(Map<String, dynamic> json)
+      : rain = json['rain'] is int ? (json['rain'] as int).toDouble() : json['rain'];
+}
+
+class Measurement {
+  final String type;
+  final int date;
+  final String stationID;
+  final MeasurementTemperature temp;
+  final MeasurementHumidity humidity;
+  final MeasurementWind wind;
+  final MeasurementPressure pressure;
+  final MeasurementPrecipitation precipitation;
+
+  Measurement(this.type, this.date, this.stationID, this.temp, this.humidity,
+      this.wind, this.pressure, this.precipitation);
+
+  Measurement.fromJson(Map<String, dynamic> json)
+      : type = json['type'],
+        date = json['date'],
+        stationID = json['station_id'],
+        temp = MeasurementTemperature.fromJson(json['temp']),
+        humidity = MeasurementHumidity.fromJson(json['humidity']),
+        wind = MeasurementWind.fromJson(json['wind']),
+        pressure = MeasurementPressure.fromJson(json['pressure']),
+        precipitation =
+            MeasurementPrecipitation.fromJson(json['precipitation']);
+}
+
+class MeasurementRequest {
+  final String stationID;
+  final String type;
+  final int limit;
+  final int from;
+  final int to;
+
+  MeasurementRequest(this.stationID, this.type, this.limit, this.from, this.to);
+
+  Map<String, dynamic> toJson() => {
+        'station_id': this.stationID,
+        'type': this.type,
+        'limit': this.limit,
+        'from': this.from,
+        'to': this.to,
+      };
 }
 
 class OpenWeatherMapStationsV3 {
+  // TODO could also come from the settings
   static const String baseURI = "http://api.openweathermap.org/data/3.0";
 
   OpenWeatherMapStationsV3(this.apiKey);
@@ -54,21 +156,24 @@ class OpenWeatherMapStationsV3 {
   // TODO return Station model instead of the http response
   Future<dynamic> getStationByID(String stationID) async {
     http.Response resp =
-    await http.get('$baseURI/stations/$stationID?appid=$apiKey');
+        await http.get('$baseURI/stations/$stationID?appid=$apiKey');
 
     return resp;
   }
 
   Future<dynamic> createStation(Station station) async {
     http.Response resp = await http.post('$baseURI/stations?appid=$apiKey',
-      headers: {'Content-Type': 'application/json; charset=utf-8'}, body: station.toJson());
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: station.toJson());
     return resp;
   }
 
   // TODO this function can only work with a fully populated station model returned by the api
   Future<dynamic> updateStation(Station station) async {
-    http.Response resp = await http.put('$baseURI/stations/${station.id}?appid=$apiKey',
-      headers: {'Content-Type': 'application/json; charset=utf-8'}, body: station.toJson());
+    http.Response resp = await http.put(
+        '$baseURI/stations/${station.id}?appid=$apiKey',
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        body: station.toJson());
     return resp;
   }
 
@@ -86,7 +191,23 @@ class OpenWeatherMapStationsV3 {
   }
 
   Future<dynamic> deleteStationByID(String stationID) async {
-    http.Response resp = await http.delete('$baseURI/stations/$stationID?appid=$apiKey');
+    http.Response resp =
+        await http.delete('$baseURI/stations/$stationID?appid=$apiKey');
     return resp;
+  }
+
+  Future<List<Measurement>> getMeasurements(MeasurementRequest req) async {
+    var measurements = <Measurement>[];
+    final resp = await http.get(
+        '$baseURI/measurements?station_id=${req.stationID}&type=${req.type}&limit=${req.limit}&from=${req.from}&to=${req.to}&appid=$apiKey');
+    if (resp.statusCode == 200) {
+      final Iterable result = json.decode(resp.body);
+      measurements = result.map((e) => Measurement.fromJson(e)).toList();
+    } else {
+      // TODO work out a proper user facing error message
+      throw Exception('Failed to fetch measurements');
+    }
+    // reverse the list to get the latest measurements on top
+    return measurements.reversed.toList();
   }
 }

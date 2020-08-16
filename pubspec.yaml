@@ -38,6 +38,9 @@ dependencies:
   # https://pub.dev/packages/shared_preferences_settings
   shared_preferences_settings: ^1.2.0
 
+  # https://github.com/andresaraujo/timeago.dart
+  timeago: ^2.0.26
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
