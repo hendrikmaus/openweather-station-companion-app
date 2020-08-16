@@ -41,6 +41,9 @@ dependencies:
   # https://github.com/andresaraujo/timeago.dart
   timeago: ^2.0.26
 
+  # https://pub.dev/packages/duration
+  duration: ^2.0.15
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,20 +1,11 @@
 import 'dart:developer';
 
+import 'package:duration/duration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:openweathermap_stations_api/openweathermap_stations_v3.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
-/*
-TODO
-- app starts and checks if it knows an api key
-  - if not > form to enter api key
-    - supporting one api is ok, right? a user should not have multiple api keys
-- app displays a list view of stations
-  - floating + button on the lower right side to create new stations
-- a tap on a station switches to a list of the 10 latest measurements for the station
- */
 
 void main() => runApp(MyApp());
 
@@ -91,16 +82,64 @@ class _StationsState extends State<Stations> {
       return SettingsScreen(
         title: "Settings",
         children: [
-          // TODO add some help on where to get an API key
-          TextFieldModalSettingsTile(
-            settingKey: 'api-key',
-            title: 'API Key',
-            obscureText: true,
-            okCaption: 'Save',
-            subtitle: 'Your API key to access OpenWeatherMap',
-            icon: Icon(Icons.vpn_key),
+          SettingsTileGroup(
+            title: 'Connectivity',
+            children: [
+              // TODO add some help on where to get an API key
+              TextFieldModalSettingsTile(
+                settingKey: 'api-key',
+                title: 'API Key',
+                obscureText: true,
+                okCaption: 'Save',
+                subtitle:
+                    'Your API key to access OpenWeatherMap\n\nGet your key:\n1) Register for a free account on https://openweathermap.org\n2) Navigate to "API keys" in your profile view\n3) Create a key for the app to use\n',
+              ),
+            ],
           ),
-          // TODO add a section with default settings to fetch measurements
+          SettingsTileGroup(
+            title: 'Measurements',
+            children: [
+              RadioPickerSettingsTile(
+                settingKey: 'm-type',
+                title: 'Aggregation Type',
+                subtitle: 'Define the resolution of the aggregated data',
+                values: {
+                  'm': 'Minute',
+                  'h': 'Hour',
+                  'd': 'Day',
+                },
+                defaultKey: 'h',
+              ),
+              RadioPickerSettingsTile(
+                settingKey: 'm-from',
+                title: 'Timeframe',
+                subtitle: 'Default time from which to start the data points',
+                // Since the map can only have a string for a key,
+                // we need to turn it into an integer, multiply it by 60 to get seconds
+                // multiply it by 1000 to get milliseconds and then add it to the epoch millis
+                // to get the value for the DateTime. The api ultimately wants a unix timestamp in seconds
+                values: {
+                  '1h': '1 hour',
+                  '2h': '2 hours',
+                  '3h': '3 hours',
+                  '5h': '5 hours',
+                  '8h': '8 hours',
+                  '1d': '1 day',
+                  '3d': '3 days',
+                  '1w': '1 week',
+                },
+                defaultKey: '24',
+              ),
+              SliderSettingsTile(
+                settingKey: 'm-limit',
+                title: 'Result Limit',
+                subtitle: 'Default amount of data points',
+                defaultValue: 10.0,
+                minValue: 1.0,
+                maxValue: 100.0,
+              ),
+            ],
+          ),
         ],
       );
     }));
@@ -151,6 +190,7 @@ class _MeasurementsState extends State<Measurements> {
   }
 
   void _getMeasurements() async {
+    // TODO turn the setting keys into an enum
     String apiKey = await Settings().getString('api-key', '');
     // TODO pretty impossible to get here without an api key, so we'll throw an exception if we cannot retrieve it
     if (apiKey.isEmpty) {
@@ -159,11 +199,18 @@ class _MeasurementsState extends State<Measurements> {
 
     OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
 
-    // TODO the request value defaults can come from the settings
+    String durationSetting = await Settings().getString('m-from', '24h');
+    Duration dur = parseDuration(durationSetting);
+
     // TODO the user should be able to select them at the top of the view
-    // TODO handle pagination
-    MeasurementRequest req =
-        MeasurementRequest(_station.id, 'm', 10, 1597501175, 1597574084);
+    // TODO handle pagination - I think the api does not support pagination (yet)
+    // TODO display a snackbar during the api call as it might take some time
+    MeasurementRequest req = MeasurementRequest(
+        _station.id,
+        await Settings().getString('m-type', 'h'),
+        (await Settings().getDouble('m-limit', 10)).toInt(),
+        DateTime.now().subtract(dur).millisecondsSinceEpoch ~/ 1000,
+        DateTime.now().millisecondsSinceEpoch ~/ 1000);
 
     client.getMeasurements(req).then((value) => {
           setState(() {
@@ -188,7 +235,6 @@ class _MeasurementsState extends State<Measurements> {
         m.temp.average.toString() + ' °C',
         style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
       ),
-//      trailing: Text(m.humidity.average.toString() + '%'),
       trailing: Icon(Icons.keyboard_arrow_right),
       onTap: () {
         Navigator.of(context)
