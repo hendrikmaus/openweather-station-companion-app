@@ -79,6 +79,7 @@ class _StationsState extends State<Stations> {
               });
         } else {
           return await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            // TODO now the form needs to support being in update mode
             return StationForm();
           }));
         }
@@ -102,8 +103,6 @@ class _StationsState extends State<Stations> {
             throw Exception('Failed to delete station');
             // TODO we need to handle that the list view expected the item to go away, but it did not!
           }
-        } else {
-          print("edit");
         }
       },
       child: ListTile(
