@@ -1,15 +1,14 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class Station {
   // Fields relevant for creating and updating
-  final String externalID;
-  final String name;
-  final double latitude;
-  final double longitude;
-  final int altitude;
+  String externalID;
+  String name;
+  double latitude;
+  double longitude;
+  int altitude;
 
   // Fields set by the API when returning station resources
   String id;
@@ -18,7 +17,11 @@ class Station {
   int rank;
 
   Station(
-      this.externalID, this.name, this.latitude, this.longitude, this.altitude);
+      {this.externalID,
+      this.name,
+      this.latitude,
+      this.longitude,
+      this.altitude});
 
   // ToJson yields the required structure to create/update stations
   Map<String, dynamic> toJson() => {
@@ -35,9 +38,9 @@ class Station {
         createdAt = json['created_at'],
         updatedAt = json['updated_at'],
         externalID = json['external_id'],
-        latitude = json['latitude'],
-        longitude = json['longitude'],
-        altitude = json['altitude'],
+        latitude = json['latitude'] is int ? (json['latitude'] as int).toDouble() : json['latitude'],
+        longitude = json['longitude'] is int ? (json['longitude'] as int).toDouble() : json['longitude'],
+        altitude = json['altitude'] is int ? json['altitude'] as int : json['altitude'],
         rank = json['rank'];
 }
 
@@ -50,9 +53,13 @@ class MeasurementTemperature {
   MeasurementTemperature(this.max, this.min, this.average, this.weight);
 
   MeasurementTemperature.fromJson(Map<String, dynamic> json)
-      : max = json['max'] is int ? (json['max'] as int).toDouble() : json['max'],
-        min = json['min'] is int ? (json['min'] as int).toDouble() : json['min'],
-        average = json['average'] is int ? (json['average'] as int).toDouble() : json['average'],
+      : max =
+            json['max'] is int ? (json['max'] as int).toDouble() : json['max'],
+        min =
+            json['min'] is int ? (json['min'] as int).toDouble() : json['min'],
+        average = json['average'] is int
+            ? (json['average'] as int).toDouble()
+            : json['average'],
         weight = json['weight'];
 }
 
@@ -63,7 +70,9 @@ class MeasurementHumidity {
   MeasurementHumidity(this.average, this.weight);
 
   MeasurementHumidity.fromJson(Map<String, dynamic> json)
-      : average = json['average'] is int ? (json['average'] as int).toDouble() : json['average'],
+      : average = json['average'] is int
+            ? (json['average'] as int).toDouble()
+            : json['average'],
         weight = json['weight'];
 }
 
@@ -75,7 +84,9 @@ class MeasurementWind {
 
   MeasurementWind.fromJson(Map<String, dynamic> json)
       : deg = json['deg'],
-        speed = json['speed'] is int ? (json['speed'] as int).toDouble() : json['speed'];
+        speed = json['speed'] is int
+            ? (json['speed'] as int).toDouble()
+            : json['speed'];
 }
 
 class MeasurementPressure {
@@ -87,9 +98,13 @@ class MeasurementPressure {
   MeasurementPressure(this.max, this.min, this.average, this.weight);
 
   MeasurementPressure.fromJson(Map<String, dynamic> json)
-      : max = json['max'] is int ? (json['max'] as int).toDouble() : json['max'],
-        min = json['min'] is int ? (json['min'] as int).toDouble() : json['min'],
-        average = json['average'] is int ? (json['average'] as int).toDouble() : json['average'],
+      : max =
+            json['max'] is int ? (json['max'] as int).toDouble() : json['max'],
+        min =
+            json['min'] is int ? (json['min'] as int).toDouble() : json['min'],
+        average = json['average'] is int
+            ? (json['average'] as int).toDouble()
+            : json['average'],
         weight = json['weight'];
 }
 
@@ -99,7 +114,9 @@ class MeasurementPrecipitation {
   MeasurementPrecipitation(this.rain);
 
   MeasurementPrecipitation.fromJson(Map<String, dynamic> json)
-      : rain = json['rain'] is int ? (json['rain'] as int).toDouble() : json['rain'];
+      : rain = json['rain'] is int
+            ? (json['rain'] as int).toDouble()
+            : json['rain'];
 }
 
 class Measurement {
@@ -164,7 +181,7 @@ class OpenWeatherMapStationsV3 {
   Future<dynamic> createStation(Station station) async {
     http.Response resp = await http.post('$baseURI/stations?appid=$apiKey',
         headers: {'Content-Type': 'application/json; charset=utf-8'},
-        body: station.toJson());
+        body: jsonEncode(station.toJson()));
     return resp;
   }
 
