@@ -55,8 +55,25 @@ class _MeasurementsState extends State<Measurements> {
 
   _MeasurementsState(this._station);
 
-  ExpansionTile _buildItemsForListViewExpandable(
-      BuildContext context, int index) {
+  _buildListView() {
+    if (_measurements.length == 0) {
+      return Container(
+        alignment: Alignment.topCenter,
+        padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+        child: ListTile(
+            title: Text('No measurements found', textAlign: TextAlign.center),
+            enabled: false,
+        ),
+      );
+    } else {
+      return ListView.builder(
+        itemBuilder: _buildItemsForListViewExpandable,
+        itemCount: _measurements.length,
+      );
+    }
+  }
+
+  Widget _buildItemsForListViewExpandable(BuildContext context, int index) {
     if (_measurements[index] == null) {
       return null;
     }
@@ -121,10 +138,7 @@ class _MeasurementsState extends State<Measurements> {
       appBar: AppBar(
         title: Text('Measurements (${_station.externalID})'),
       ),
-      body: ListView.builder(
-        itemBuilder: _buildItemsForListViewExpandable,
-        itemCount: _measurements.length,
-      ),
+      body: _buildListView(),
     );
   }
 }
