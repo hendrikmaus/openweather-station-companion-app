@@ -50,50 +50,77 @@ class _StationsState extends State<Stations> {
         child: Icon(Icons.delete, color: Colors.white),
       ),
       secondaryBackground: Container(
-        color: Colors.red,
+        color: Colors.blue,
         padding: EdgeInsets.symmetric(horizontal: 20),
         alignment: AlignmentDirectional.centerEnd,
-        child: Icon(Icons.delete, color: Colors.white),
+        child: Icon(Icons.edit, color: Colors.white),
       ),
       confirmDismiss: (direction) async {
-        return await showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                content: Text(
-                    'Do you really want to delete this station? All measurements will be deleted as well. This action cannot be undone.'),
-                actions: [
-                  FlatButton(
-                    child: Text('Cancel'),
-                    onPressed: () => Navigator.of(context).pop(false),
-                    textColor: Colors.grey,
-                  ),
-                  FlatButton(
-                    child: Text('Delete'),
-                    onPressed: () => Navigator.of(context).pop(true),
-                    textColor: Colors.red,
-                  ),
-                ],
-              );
-            });
+        if (direction == DismissDirection.startToEnd) {
+          return await showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  content: Text(
+                      'Do you really want to delete this station? All measurements will be deleted as well. This action cannot be undone.'),
+                  actions: [
+                    FlatButton(
+                      child: Text('Cancel'),
+                      onPressed: () => Navigator.of(context).pop(false),
+                      textColor: Colors.grey,
+                    ),
+                    FlatButton(
+                      child: Text('Delete'),
+                      onPressed: () => Navigator.of(context).pop(true),
+                      textColor: Colors.red,
+                    ),
+                  ],
+                );
+              });
+        } else {
+          return await showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  content: Text(
+                      'Displaying this dialog until I figured out how to bring up the edit form'),
+                  actions: [
+                    FlatButton(
+                      child: Text('Cancel'),
+                      onPressed: () => Navigator.of(context).pop(false),
+                      textColor: Colors.grey,
+                    ),
+                    FlatButton(
+                      child: Text('Ok'),
+                      onPressed: () => Navigator.of(context).pop(false),
+                      textColor: Colors.blue,
+                    ),
+                  ],
+                );
+              });
+        }
       },
       onDismissed: (direction) async {
-        String apiKey = await Settings().getString('api-key', '');
-        if (apiKey.isEmpty) {
-          throw Exception('Could not retrieve API key from settings');
-        }
-        OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
-        http.Response resp = await client.deleteStationByID(_stations[index].id);
-        if (resp.statusCode == 204) {
-          Scaffold.of(context)
-              .showSnackBar(SnackBar(content: Text('Deleted station: ${_stations[index].externalID}')));
-          setState(() {
-            _stations.removeAt(index);
-          });
+        if (direction == DismissDirection.startToEnd) {
+          String apiKey = await Settings().getString('api-key', '');
+          if (apiKey.isEmpty) {
+            throw Exception('Could not retrieve API key from settings');
+          }
+          OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
+          http.Response resp = await client.deleteStationByID(_stations[index].id);
+          if (resp.statusCode == 204) {
+            Scaffold.of(context)
+                .showSnackBar(SnackBar(content: Text('Deleted station: ${_stations[index].externalID}')));
+            setState(() {
+              _stations.removeAt(index);
+            });
+          } else {
+            // TODO handle this properly with a user-facing error message
+            throw Exception('Failed to delete station');
+            // TODO we need to handle that the list view expected the item to go away, but it did not!
+          }
         } else {
-          // TODO handle this properly with a user-facing error message
-          throw Exception('Failed to delete station');
-          // TODO we need to handle that the list view expected the item to go away, but it did not!
+          print("edit");
         }
       },
       child: ListTile(
