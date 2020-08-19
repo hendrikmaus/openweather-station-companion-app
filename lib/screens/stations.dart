@@ -30,10 +30,10 @@ class _StationsState extends State<Stations> {
     }
     OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
     client.getStations().then((value) => {
-      setState(() {
-        _stations = value;
-      })
-    });
+          setState(() {
+            _stations = value;
+          })
+        });
   }
 
   Widget _buildItemsForListView(BuildContext context, int index) {
@@ -78,7 +78,8 @@ class _StationsState extends State<Stations> {
                 );
               });
         } else {
-          return await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+          return await Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) {
             // TODO now the form needs to support being in update mode
             return StationForm();
           }));
@@ -91,16 +92,19 @@ class _StationsState extends State<Stations> {
             throw Exception('Could not retrieve API key from settings');
           }
           OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
-          http.Response resp = await client.deleteStationByID(_stations[index].id);
+          http.Response resp =
+              await client.deleteStationByID(_stations[index].id);
           if (resp.statusCode == 204) {
-            Scaffold.of(context)
-                .showSnackBar(SnackBar(content: Text('Deleted station: ${_stations[index].externalID}')));
+            Scaffold.of(context).showSnackBar(SnackBar(
+                content:
+                    Text('Deleted station: ${_stations[index].externalID}')));
             setState(() {
               _stations.removeAt(index);
             });
           } else {
-            Scaffold.of(context)
-              .showSnackBar(SnackBar(content: Text('Failed to delete station: ${_stations[index].externalID}')));
+            Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text(
+                    'Failed to delete station: ${_stations[index].externalID}')));
             print(resp.body);
           }
         }
@@ -126,7 +130,7 @@ class _StationsState extends State<Stations> {
   void _pushSettings() {
     Navigator.of(context)
         .push(MaterialPageRoute<void>(builder: (BuildContext context) {
-          return AppSettings();
+      return AppSettings();
     }));
   }
 
