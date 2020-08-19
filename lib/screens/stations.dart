@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:openweathermap_stations_api/screens/settings.dart';
 import 'package:openweathermap_stations_api/screens/stations_form.dart';
@@ -102,9 +104,16 @@ class _StationsState extends State<Stations> {
               _stations.removeAt(index);
             });
           } else {
-            Scaffold.of(context).showSnackBar(SnackBar(
-                content: Text(
-                    'Failed to delete station: ${_stations[index].externalID}')));
+            var errMsg = jsonDecode(resp.body);
+            if (errMsg['message'] == null) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      'Failed to delete station: ${_stations[index].externalID}')));
+            } else {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      'Failed to delete station: ${_stations[index].externalID}\n${errMsg['message']}')));
+            }
             print(resp.body);
           }
         }

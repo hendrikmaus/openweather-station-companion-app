@@ -1,5 +1,7 @@
 // TODO we also need to be able to edit Stations; it would be nice to re-use the form
 // instead if duplicating it entirely with different labels
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
@@ -151,10 +153,18 @@ class _StationFormState extends State<StationForm> {
                             Navigator.of(context).pop();
                             // TODO how do we refresh the underlying view?
                           } else {
-                            print('error during creation of the station');
-                            print(resp.body);
-                            // TODO how to display the error and mark the form fields accordingly?
-                            // error example: when the lat/lng values are too large: I/flutter (14325): {"code":400001,"message":"Station latitude should be in (-90:90)"}
+                            var errMsg = jsonDecode(resp.body);
+                            if (errMsg['message'] == null) {
+                              Scaffold.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text('Failed to create station'),
+                              ));
+                            } else {
+                              Scaffold.of(context)
+                                .showSnackBar(SnackBar(
+                                  content: Text('Failed to create station:\n${errMsg['message']}'),
+                              ));
+                            }
                           }
                         }
                       },
