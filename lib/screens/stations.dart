@@ -99,9 +99,9 @@ class _StationsState extends State<Stations> {
               _stations.removeAt(index);
             });
           } else {
-            // TODO handle this properly with a user-facing error message
-            throw Exception('Failed to delete station');
-            // TODO we need to handle that the list view expected the item to go away, but it did not!
+            Scaffold.of(context)
+              .showSnackBar(SnackBar(content: Text('Failed to delete station: ${_stations[index].externalID}')));
+            print(resp.body);
           }
         }
       },
