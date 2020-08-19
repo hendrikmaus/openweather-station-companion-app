@@ -1,5 +1,6 @@
 // TODO we also need to be able to edit Stations; it would be nice to re-use the form
 // instead if duplicating it entirely with different labels
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:http/http.dart' as http;
@@ -123,39 +124,44 @@ class _StationFormState extends State<StationForm> {
                       });
                     },
                   ),
-                  RaisedButton(
-                    onPressed: () async {
-                      final form = _formKey.currentState;
-                      if (form.validate()) {
-                        form.save();
-                        Scaffold.of(context).showSnackBar(
-                            SnackBar(content: Text('Processing ...')));
+                  Container(
+                    margin: EdgeInsets.all(10.0),
+                    child: RaisedButton(
+                      onPressed: () async {
+                        final form = _formKey.currentState;
+                        if (form.validate()) {
+                          form.save();
+                          Scaffold.of(context).showSnackBar(
+                              SnackBar(content: Text('Processing ...')));
 
-                        // TODO call the OpenWeatherMap API with the station model
-                        // TODO what happens of the API call fails?
-                        // I would like to not loose the form content, but mark the respective fields
-                        String apiKey =
-                        await Settings().getString('api-key', '');
-                        if (apiKey.isEmpty) {
-                          throw Exception(
-                              'Could not retrieve API key from settings');
+                          // TODO call the OpenWeatherMap API with the station model
+                          // TODO what happens of the API call fails?
+                          // I would like to not loose the form content, but mark the respective fields
+                          String apiKey =
+                              await Settings().getString('api-key', '');
+                          if (apiKey.isEmpty) {
+                            throw Exception(
+                                'Could not retrieve API key from settings');
+                          }
+                          OpenWeatherMapStationsV3 client =
+                              OpenWeatherMapStationsV3(apiKey);
+                          http.Response resp =
+                              await client.createStation(_station);
+                          if (resp.statusCode == 201) {
+                            Navigator.of(context).pop();
+                            // TODO how do we refresh the underlying view?
+                          } else {
+                            print('error during creation of the station');
+                            print(resp.body);
+                            // TODO how to display the error and mark the form fields accordingly?
+                            // error example: when the lat/lng values are too large: I/flutter (14325): {"code":400001,"message":"Station latitude should be in (-90:90)"}
+                          }
                         }
-                        OpenWeatherMapStationsV3 client =
-                        OpenWeatherMapStationsV3(apiKey);
-                        http.Response resp =
-                        await client.createStation(_station);
-                        if (resp.statusCode == 201) {
-                          Navigator.of(context).pop();
-                          // TODO how do we refresh the underlying view?
-                        } else {
-                          print('error during creation of the station');
-                          print(resp.body);
-                          // TODO how to display the error and mark the form fields accordingly?
-                          // error example: when the lat/lng values are too large: I/flutter (14325): {"code":400001,"message":"Station latitude should be in (-90:90)"}
-                        }
-                      }
-                    },
-                    child: Text('Create'),
+                      },
+                      child: Text('Create'),
+                      color: Colors.blueAccent,
+                      textColor: Colors.white,
+                    ),
                   ),
                 ],
               ),

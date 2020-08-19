@@ -78,26 +78,9 @@ class _StationsState extends State<Stations> {
                 );
               });
         } else {
-          return await showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  content: Text(
-                      'Displaying this dialog until I figured out how to bring up the edit form'),
-                  actions: [
-                    FlatButton(
-                      child: Text('Cancel'),
-                      onPressed: () => Navigator.of(context).pop(false),
-                      textColor: Colors.grey,
-                    ),
-                    FlatButton(
-                      child: Text('Ok'),
-                      onPressed: () => Navigator.of(context).pop(false),
-                      textColor: Colors.blue,
-                    ),
-                  ],
-                );
-              });
+          return await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+            return StationForm();
+          }));
         }
       },
       onDismissed: (direction) async {
