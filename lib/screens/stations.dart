@@ -143,6 +143,24 @@ class _StationsState extends State<Stations> {
     }));
   }
 
+  Widget _buildListView() {
+    if (_stations.length == 0) {
+      return Container(
+        alignment: Alignment.topCenter,
+        padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+        child: ListTile(
+          title: Text('No stations found', textAlign: TextAlign.center),
+          enabled: false,
+        ),
+      );
+    } else {
+      return ListView.builder(
+        itemBuilder: _buildItemsForListView,
+        itemCount: _stations.length,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,10 +173,7 @@ class _StationsState extends State<Stations> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemBuilder: _buildItemsForListView,
-        itemCount: _stations.length,
-      ),
+      body: _buildListView(),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add Station',
         child: Icon(Icons.add),

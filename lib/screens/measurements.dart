@@ -55,7 +55,17 @@ class _MeasurementsState extends State<Measurements> {
 
   _MeasurementsState(this._station);
 
-  _buildListView() {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Measurements (${_station.externalID})'),
+      ),
+      body: _buildListView(),
+    );
+  }
+
+  Widget _buildListView() {
     if (_measurements.length == 0) {
       return Container(
         alignment: Alignment.topCenter,
@@ -129,16 +139,6 @@ class _MeasurementsState extends State<Measurements> {
           trailing: Text(m.precipitation.rain.toString() + ' mm'),
         )
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Measurements (${_station.externalID})'),
-      ),
-      body: _buildListView(),
     );
   }
 }
