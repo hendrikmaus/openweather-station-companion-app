@@ -161,7 +161,6 @@ class _StationsState extends State<Stations> {
     if (_displayEmptyList) {
       return RefreshIndicator(
         child: ListView(
-          padding: EdgeInsets.all(8),
           children: [
             Container(
               margin: EdgeInsets.symmetric(horizontal: 0, vertical: 50),
@@ -179,7 +178,6 @@ class _StationsState extends State<Stations> {
     return _stations.length != 0 && _displayEmptyList == false
         ? RefreshIndicator(
       child: ListView.builder(
-        padding: EdgeInsets.all(8),
         itemCount: _stations.length,
         itemBuilder: _buildItemsForListView,
       ),

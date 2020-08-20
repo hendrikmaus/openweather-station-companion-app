@@ -82,7 +82,6 @@ class _MeasurementsState extends State<Measurements> {
     if (_displayEmptyList) {
       return RefreshIndicator(
         child: ListView(
-          padding: EdgeInsets.all(8),
           children: [
             Container(
               margin: EdgeInsets.symmetric(horizontal: 0, vertical: 50),
@@ -100,7 +99,6 @@ class _MeasurementsState extends State<Measurements> {
     return _measurements.length != 0 && _displayEmptyList == false
         ? RefreshIndicator(
       child: ListView.builder(
-        padding: EdgeInsets.all(8),
         itemCount: _measurements.length,
         itemBuilder: _buildItemsForListViewExpandable,
       ),
