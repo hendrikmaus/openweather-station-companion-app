@@ -28,30 +28,23 @@ class _MeasurementsState extends State<Measurements> {
   Future<void> _getMeasurements() async {
     // TODO turn the setting keys into an enum
     String apiKey = await Settings().getString('api-key', '');
-    // TODO pretty impossible to get here without an api key, so we'll throw an exception if we cannot retrieve it
     if (apiKey.isEmpty) {
       throw Exception('Could not retrieve API key from settings');
     }
-
     OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
 
     String durationSetting = await Settings().getString('m-from', '24h');
     Duration dur = parseDuration(durationSetting);
 
-    // TODO the user should be able to select them at the top of the view
+    // TODO the user should be able to select the parameters for the search at the top of the list view
     // TODO handle pagination - I think the api does not support pagination (yet)
-    // TODO display a snackbar during the api call as it might take some time
+    // TODO display a loading indicator during the api call as it might take some time
     MeasurementRequest req = MeasurementRequest(
         _station.id,
         await Settings().getString('m-type', 'h'),
         (await Settings().getDouble('m-limit', 10)).toInt(),
-        DateTime
-            .now()
-            .subtract(dur)
-            .millisecondsSinceEpoch ~/ 1000,
-        DateTime
-            .now()
-            .millisecondsSinceEpoch ~/ 1000);
+        DateTime.now().subtract(dur).millisecondsSinceEpoch ~/ 1000,
+        DateTime.now().millisecondsSinceEpoch ~/ 1000);
 
     client.getMeasurements(req).then((value) {
       setState(() {
@@ -86,7 +79,8 @@ class _MeasurementsState extends State<Measurements> {
             Container(
               margin: EdgeInsets.symmetric(horizontal: 0, vertical: 50),
               child: ListTile(
-                title: Text('No measurements found', textAlign: TextAlign.center),
+                title:
+                    Text('No measurements found', textAlign: TextAlign.center),
                 enabled: false,
               ),
             )
@@ -98,12 +92,12 @@ class _MeasurementsState extends State<Measurements> {
 
     return _measurements.length != 0 && _displayEmptyList == false
         ? RefreshIndicator(
-      child: ListView.builder(
-        itemCount: _measurements.length,
-        itemBuilder: _buildItemsForListViewExpandable,
-      ),
-      onRefresh: _getMeasurements,
-    )
+            child: ListView.builder(
+              itemCount: _measurements.length,
+              itemBuilder: _buildItemsForListViewExpandable,
+            ),
+            onRefresh: _getMeasurements,
+          )
         : Center(child: CircularProgressIndicator());
   }
 
@@ -114,7 +108,7 @@ class _MeasurementsState extends State<Measurements> {
 
     final Measurement m = _measurements[index];
     final DateTime timeStamp =
-    DateTime.fromMillisecondsSinceEpoch(m.date * 1000);
+        DateTime.fromMillisecondsSinceEpoch(m.date * 1000);
     return ExpansionTile(
       subtitle: Text(timeago.format(timeStamp)),
       title: Text(

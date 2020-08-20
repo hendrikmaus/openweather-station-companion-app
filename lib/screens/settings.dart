@@ -15,14 +15,13 @@ class _AppSettingsState extends State<AppSettings> {
         SettingsTileGroup(
           title: 'Connectivity',
           children: [
-            // TODO add some help on where to get an API key
             TextFieldModalSettingsTile(
               settingKey: 'api-key',
               title: 'API Key',
               obscureText: true,
               okCaption: 'Save',
               subtitle:
-              'Your API key to access OpenWeatherMap\n\nGet your key:\n1) Register for a free account on https://openweathermap.org\n2) Navigate to "API keys" in your profile view\n3) Create a key for the app to use\n',
+                  'Your API key to access OpenWeatherMap\n\nGet your key:\n1) Register for a free account on https://openweathermap.org\n2) Navigate to "API keys" in your profile view\n3) Create a key for the app to use\n',
             ),
           ],
         ),

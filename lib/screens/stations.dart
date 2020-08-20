@@ -48,12 +48,8 @@ class _StationsState extends State<Stations> {
   }
 
   Widget _buildItemsForListView(BuildContext context, int index) {
-    // TODO when the stations list is empty, we can display a single large tile in the center that helps to set up things
-    // TODO add dividers to the list view
-    // https://medium.com/flutter-community/an-in-depth-dive-into-implementing-swipe-to-dismiss-in-flutter-41b9007f1e0
     return Dismissible(
       key: Key(_stations[index].id),
-      // TODO one of these actions should be tuned into editing the station details
       background: Container(
         color: Colors.red,
         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -91,7 +87,6 @@ class _StationsState extends State<Stations> {
         } else {
           return await Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) {
-            // TODO now the form needs to support being in update mode
             return StationFormUpdate(station: _stations[index]);
           }));
         }
@@ -104,11 +99,11 @@ class _StationsState extends State<Stations> {
           }
           OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
           http.Response resp =
-          await client.deleteStationByID(_stations[index].id);
+              await client.deleteStationByID(_stations[index].id);
           if (resp.statusCode == 204) {
             Scaffold.of(context).showSnackBar(SnackBar(
                 content:
-                Text('Deleted station: ${_stations[index].externalID}')));
+                    Text('Deleted station: ${_stations[index].externalID}')));
             setState(() {
               _stations.removeAt(index);
             });
@@ -117,13 +112,11 @@ class _StationsState extends State<Stations> {
             if (errMsg['message'] == null) {
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text(
-                      'Failed to delete station: ${_stations[index]
-                          .externalID}')));
+                      'Failed to delete station: ${_stations[index].externalID}')));
             } else {
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text(
-                      'Failed to delete station: ${_stations[index]
-                          .externalID}\n${errMsg['message']}')));
+                      'Failed to delete station: ${_stations[index].externalID}\n${errMsg['message']}')));
             }
             print(resp.body);
           }
@@ -175,12 +168,12 @@ class _StationsState extends State<Stations> {
 
     return _stations.length != 0 && _displayEmptyList == false
         ? RefreshIndicator(
-      child: ListView.builder(
-        itemCount: _stations.length,
-        itemBuilder: _buildItemsForListView,
-      ),
-      onRefresh: _populateStations,
-    )
+            child: ListView.builder(
+              itemCount: _stations.length,
+              itemBuilder: _buildItemsForListView,
+            ),
+            onRefresh: _populateStations,
+          )
         : Center(child: CircularProgressIndicator());
   }
 

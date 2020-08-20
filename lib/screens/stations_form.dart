@@ -42,7 +42,6 @@ class _StationFormCreateState extends State<StationFormCreate> {
                       if (value.isEmpty) {
                         return 'This value is required';
                       }
-                      // TODO should we restrict the value somehow according to the API specs?
                       return null;
                     },
                     onSaved: (value) {
@@ -137,20 +136,16 @@ class _StationFormCreateState extends State<StationFormCreate> {
                           form.save();
                           Scaffold.of(context).showSnackBar(
                               SnackBar(content: Text('Processing ...')));
-
-                          // TODO call the OpenWeatherMap API with the station model
-                          // TODO what happens of the API call fails?
-                          // I would like to not loose the form content, but mark the respective fields
                           String apiKey =
-                          await Settings().getString('api-key', '');
+                              await Settings().getString('api-key', '');
                           if (apiKey.isEmpty) {
                             throw Exception(
                                 'Could not retrieve API key from settings');
                           }
                           OpenWeatherMapStationsV3 client =
-                          OpenWeatherMapStationsV3(apiKey);
+                              OpenWeatherMapStationsV3(apiKey);
                           http.Response resp =
-                          await client.createStation(_station);
+                              await client.createStation(_station);
                           if (resp.statusCode == 201) {
                             Navigator.of(context).pop();
                             // TODO how do we refresh the underlying view?
@@ -220,7 +215,6 @@ class _StationFormUpdateState extends State<StationFormUpdate> {
                       if (value.isEmpty) {
                         return 'This value is required';
                       }
-                      // TODO should we restrict the value somehow according to the API specs?
                       return null;
                     },
                     onSaved: (value) {
@@ -262,7 +256,8 @@ class _StationFormUpdateState extends State<StationFormUpdate> {
                     },
                     onSaved: (value) {
                       setState(() {
-                        this.widget.station.latitude = num.parse(value).toDouble();
+                        this.widget.station.latitude =
+                            num.parse(value).toDouble();
                       });
                     },
                   ),
@@ -283,7 +278,8 @@ class _StationFormUpdateState extends State<StationFormUpdate> {
                     },
                     onSaved: (value) {
                       setState(() {
-                        this.widget.station.latitude = num.parse(value).toDouble();
+                        this.widget.station.latitude =
+                            num.parse(value).toDouble();
                       });
                     },
                   ),
@@ -319,20 +315,16 @@ class _StationFormUpdateState extends State<StationFormUpdate> {
                           form.save();
                           Scaffold.of(context).showSnackBar(
                               SnackBar(content: Text('Processing ...')));
-
-                          // TODO call the OpenWeatherMap API with the station model
-                          // TODO what happens of the API call fails?
-                          // I would like to not loose the form content, but mark the respective fields
                           String apiKey =
-                          await Settings().getString('api-key', '');
+                              await Settings().getString('api-key', '');
                           if (apiKey.isEmpty) {
                             throw Exception(
                                 'Could not retrieve API key from settings');
                           }
                           OpenWeatherMapStationsV3 client =
-                          OpenWeatherMapStationsV3(apiKey);
+                              OpenWeatherMapStationsV3(apiKey);
                           http.Response resp =
-                          await client.updateStation(this.widget.station);
+                              await client.updateStation(this.widget.station);
                           if (resp.statusCode == 200) {
                             Navigator.of(context).pop();
                             // TODO how do we refresh the underlying view?

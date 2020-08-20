@@ -38,9 +38,15 @@ class Station {
         createdAt = json['created_at'],
         updatedAt = json['updated_at'],
         externalID = json['external_id'],
-        latitude = json['latitude'] is int ? (json['latitude'] as int).toDouble() : json['latitude'],
-        longitude = json['longitude'] is int ? (json['longitude'] as int).toDouble() : json['longitude'],
-        altitude = json['altitude'] is int ? json['altitude'] as int : json['altitude'],
+        latitude = json['latitude'] is int
+            ? (json['latitude'] as int).toDouble()
+            : json['latitude'],
+        longitude = json['longitude'] is int
+            ? (json['longitude'] as int).toDouble()
+            : json['longitude'],
+        altitude = json['altitude'] is int
+            ? json['altitude'] as int
+            : json['altitude'],
         rank = json['rank'];
 }
 
@@ -163,20 +169,10 @@ class MeasurementRequest {
 }
 
 class OpenWeatherMapStationsV3 {
-  // TODO could also come from the settings
   static const String baseURI = "http://api.openweathermap.org/data/3.0";
-
-  OpenWeatherMapStationsV3(this.apiKey);
-
   final String apiKey;
 
-  // TODO return Station model instead of the http response
-  Future<dynamic> getStationByID(String stationID) async {
-    http.Response resp =
-        await http.get('$baseURI/stations/$stationID?appid=$apiKey');
-
-    return resp;
-  }
+  OpenWeatherMapStationsV3(this.apiKey);
 
   Future<dynamic> createStation(Station station) async {
     http.Response resp = await http.post('$baseURI/stations?appid=$apiKey',
@@ -185,7 +181,6 @@ class OpenWeatherMapStationsV3 {
     return resp;
   }
 
-  // TODO this function can only work with a fully populated station model returned by the api
   Future<dynamic> updateStation(Station station) async {
     http.Response resp = await http.put(
         '$baseURI/stations/${station.id}?appid=$apiKey',
@@ -201,7 +196,6 @@ class OpenWeatherMapStationsV3 {
       final Iterable result = json.decode(resp.body);
       stations = result.map((e) => Station.fromJson(e)).toList();
     } else {
-      // TODO build a proper user facing error message; e.g. the api requests in the free tier might have run out
       throw Exception('Failed to get list of stations');
     }
     return stations;
@@ -221,7 +215,6 @@ class OpenWeatherMapStationsV3 {
       final Iterable result = json.decode(resp.body);
       measurements = result.map((e) => Measurement.fromJson(e)).toList();
     } else {
-      // TODO work out a proper user facing error message
       throw Exception('Failed to fetch measurements');
     }
     // reverse the list to get the latest measurements on top
