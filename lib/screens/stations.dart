@@ -17,6 +17,7 @@ class Stations extends StatefulWidget {
 class _StationsState extends State<Stations> {
   List<Station> _stations = List<Station>();
   bool _displayEmptyList = false;
+  String _displayError = "";
 
   @override
   void initState() {
@@ -37,6 +38,8 @@ class _StationsState extends State<Stations> {
 
     OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
     client.getStations().then((value) {
+      _displayError = "";
+
       if (value.length == 0) {
         print('no stations found');
         _displayEmptyList = true;
@@ -46,6 +49,8 @@ class _StationsState extends State<Stations> {
       setState(() {
         _stations = value;
       });
+    }).catchError((err) {
+      _displayError = err.toString();
     });
   }
 
@@ -149,8 +154,24 @@ class _StationsState extends State<Stations> {
     }));
   }
 
-  // https://medium.com/@maffan/implementing-pull-to-refresh-in-flutter-59dd31239624
   Widget _buildListView() {
+    if (_displayError.isNotEmpty) {
+      return RefreshIndicator(
+        child: ListView(
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 0, vertical: 50),
+              child: ListTile(
+                title: Text(_displayError, textAlign: TextAlign.center),
+                enabled: false,
+              ),
+            )
+          ],
+        ),
+        onRefresh: _populateStations,
+      );
+    }
+
     if (_displayEmptyList) {
       return RefreshIndicator(
         child: ListView(

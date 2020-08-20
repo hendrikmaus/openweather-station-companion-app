@@ -196,7 +196,10 @@ class OpenWeatherMapStationsV3 {
       final Iterable result = json.decode(resp.body);
       stations = result.map((e) => Station.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to get list of stations');
+      if (resp.statusCode == 429) {
+        throw Exception('You exceeded the API call quota');
+      }
+      throw Exception('Failed to get list of stations\n${resp.body}');
     }
     return stations;
   }
@@ -215,7 +218,7 @@ class OpenWeatherMapStationsV3 {
       final Iterable result = json.decode(resp.body);
       measurements = result.map((e) => Measurement.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to fetch measurements');
+      throw Exception('Failed to fetch measurements\n${resp.body}');
     }
     // reverse the list to get the latest measurements on top
     return measurements.reversed.toList();
