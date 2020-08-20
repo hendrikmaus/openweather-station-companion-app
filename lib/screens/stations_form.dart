@@ -9,20 +9,33 @@ import 'package:http/http.dart' as http;
 import '../openweathermap_stations_v3.dart';
 
 class StationForm extends StatefulWidget {
+  final Station station;
+
+  const StationForm({Key key, this.station}) : super(key: key);
+
   @override
-  _StationFormState createState() => _StationFormState();
+  _StationFormState createState() => _StationFormState(this.station);
 }
 
 class _StationFormState extends State<StationForm> {
   final _formKey = GlobalKey<FormState>();
-  final _station = Station();
+  final Station _station;
+
+  // TODO this crashes the create form on save as the station is null
+  _StationFormState(this._station);
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: _station == null
+          ? Text('Create Station')
+          : Text('Update Station ${_station.externalID}'),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Create Station'),
-      ),
+      appBar: _buildAppBar(),
       body: Builder(
         builder: (BuildContext context) {
           return Form(
@@ -155,14 +168,13 @@ class _StationFormState extends State<StationForm> {
                           } else {
                             var errMsg = jsonDecode(resp.body);
                             if (errMsg['message'] == null) {
-                              Scaffold.of(context)
-                                  .showSnackBar(SnackBar(
+                              Scaffold.of(context).showSnackBar(SnackBar(
                                 content: Text('Failed to create station'),
                               ));
                             } else {
-                              Scaffold.of(context)
-                                .showSnackBar(SnackBar(
-                                  content: Text('Failed to create station:\n${errMsg['message']}'),
+                              Scaffold.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    'Failed to create station:\n${errMsg['message']}'),
                               ));
                             }
                           }

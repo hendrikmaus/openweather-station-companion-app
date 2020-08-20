@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:openweathermap_stations_api/screens/settings.dart';
 import 'package:openweathermap_stations_api/screens/stations_form.dart';
@@ -22,7 +23,7 @@ class _StationsState extends State<Stations> {
     _populateStations();
   }
 
-  void _populateStations() async {
+  Future<void> _populateStations() async {
     String apiKey = await Settings().getString('api-key', '');
     if (apiKey.isEmpty) {
       setState(() {
@@ -83,7 +84,9 @@ class _StationsState extends State<Stations> {
           return await Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) {
             // TODO now the form needs to support being in update mode
-            return StationForm();
+            return StationForm(
+              station: _stations[index],
+            );
           }));
         }
       },
@@ -144,21 +147,16 @@ class _StationsState extends State<Stations> {
   }
 
   Widget _buildListView() {
-    if (_stations.length == 0) {
-      return Container(
-        alignment: Alignment.topCenter,
-        padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
-        child: ListTile(
-          title: Text('No stations found', textAlign: TextAlign.center),
-          enabled: false,
-        ),
-      );
-    } else {
-      return ListView.builder(
-        itemBuilder: _buildItemsForListView,
-        itemCount: _stations.length,
-      );
-    }
+    return _stations.length != 0
+        ? RefreshIndicator(
+            child: ListView.builder(
+              padding: EdgeInsets.all(8),
+              itemCount: _stations.length,
+              itemBuilder: _buildItemsForListView,
+            ),
+            onRefresh: _populateStations,
+          )
+        : Center(child: CircularProgressIndicator());
   }
 
   @override
