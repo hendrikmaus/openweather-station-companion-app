@@ -27,6 +27,8 @@ class _StationsState extends State<Stations> {
   Future<void> _populateStations() async {
     String apiKey = await Settings().getString('api-key', '');
     if (apiKey.isEmpty) {
+      _displayEmptyList = true;
+
       setState(() {
         _stations = List<Station>();
       });
@@ -193,7 +195,13 @@ class _StationsState extends State<Stations> {
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add Station',
         child: Icon(Icons.add),
-        onPressed: () {
+        onPressed: () async {
+          String apiKey = await Settings().getString('api-key', '');
+          if (apiKey.isEmpty) {
+            _pushSettings();
+            return;
+          }
+
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
             return StationFormCreate();
           }));
