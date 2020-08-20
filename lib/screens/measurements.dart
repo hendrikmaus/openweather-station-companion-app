@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -16,6 +17,7 @@ class Measurements extends StatefulWidget {
 class _MeasurementsState extends State<Measurements> {
   final Station _station;
   List<Measurement> _measurements = List<Measurement>();
+  bool _displayEmptyList = false;
 
   @override
   void initState() {
@@ -23,7 +25,7 @@ class _MeasurementsState extends State<Measurements> {
     _getMeasurements();
   }
 
-  void _getMeasurements() async {
+  Future<void> _getMeasurements() async {
     // TODO turn the setting keys into an enum
     String apiKey = await Settings().getString('api-key', '');
     // TODO pretty impossible to get here without an api key, so we'll throw an exception if we cannot retrieve it
@@ -43,14 +45,25 @@ class _MeasurementsState extends State<Measurements> {
         _station.id,
         await Settings().getString('m-type', 'h'),
         (await Settings().getDouble('m-limit', 10)).toInt(),
-        DateTime.now().subtract(dur).millisecondsSinceEpoch ~/ 1000,
-        DateTime.now().millisecondsSinceEpoch ~/ 1000);
+        DateTime
+            .now()
+            .subtract(dur)
+            .millisecondsSinceEpoch ~/ 1000,
+        DateTime
+            .now()
+            .millisecondsSinceEpoch ~/ 1000);
 
-    client.getMeasurements(req).then((value) => {
-          setState(() {
-            _measurements = value;
-          })
-        });
+    client.getMeasurements(req).then((value) {
+      setState(() {
+        if (value.length == 0) {
+          print('no measurements found');
+          _displayEmptyList = true;
+        } else {
+          _displayEmptyList = false;
+        }
+        _measurements = value;
+      });
+    });
   }
 
   _MeasurementsState(this._station);
@@ -66,21 +79,34 @@ class _MeasurementsState extends State<Measurements> {
   }
 
   Widget _buildListView() {
-    if (_measurements.length == 0) {
-      return Container(
-        alignment: Alignment.topCenter,
-        padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
-        child: ListTile(
-            title: Text('No measurements found', textAlign: TextAlign.center),
-            enabled: false,
+    if (_displayEmptyList) {
+      return RefreshIndicator(
+        child: ListView(
+          padding: EdgeInsets.all(8),
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 0, vertical: 50),
+              child: ListTile(
+                title: Text('No measurements found', textAlign: TextAlign.center),
+                enabled: false,
+              ),
+            )
+          ],
         ),
-      );
-    } else {
-      return ListView.builder(
-        itemBuilder: _buildItemsForListViewExpandable,
-        itemCount: _measurements.length,
+        onRefresh: _getMeasurements,
       );
     }
+
+    return _measurements.length != 0 && _displayEmptyList == false
+        ? RefreshIndicator(
+      child: ListView.builder(
+        padding: EdgeInsets.all(8),
+        itemCount: _measurements.length,
+        itemBuilder: _buildItemsForListViewExpandable,
+      ),
+      onRefresh: _getMeasurements,
+    )
+        : Center(child: CircularProgressIndicator());
   }
 
   Widget _buildItemsForListViewExpandable(BuildContext context, int index) {
@@ -90,7 +116,7 @@ class _MeasurementsState extends State<Measurements> {
 
     final Measurement m = _measurements[index];
     final DateTime timeStamp =
-        DateTime.fromMillisecondsSinceEpoch(m.date * 1000);
+    DateTime.fromMillisecondsSinceEpoch(m.date * 1000);
     return ExpansionTile(
       subtitle: Text(timeago.format(timeStamp)),
       title: Text(

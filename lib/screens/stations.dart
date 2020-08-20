@@ -16,6 +16,7 @@ class Stations extends StatefulWidget {
 
 class _StationsState extends State<Stations> {
   List<Station> _stations = List<Station>();
+  bool _displayEmptyList = false;
 
   @override
   void initState() {
@@ -31,12 +32,19 @@ class _StationsState extends State<Stations> {
       });
       return;
     }
+
     OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
-    client.getStations().then((value) => {
-          setState(() {
-            _stations = value;
-          })
-        });
+    client.getStations().then((value) {
+      if (value.length == 0) {
+        print('no stations found');
+        _displayEmptyList = true;
+      } else {
+        _displayEmptyList = false;
+      }
+      setState(() {
+        _stations = value;
+      });
+    });
   }
 
   Widget _buildItemsForListView(BuildContext context, int index) {
@@ -98,11 +106,11 @@ class _StationsState extends State<Stations> {
           }
           OpenWeatherMapStationsV3 client = OpenWeatherMapStationsV3(apiKey);
           http.Response resp =
-              await client.deleteStationByID(_stations[index].id);
+          await client.deleteStationByID(_stations[index].id);
           if (resp.statusCode == 204) {
             Scaffold.of(context).showSnackBar(SnackBar(
                 content:
-                    Text('Deleted station: ${_stations[index].externalID}')));
+                Text('Deleted station: ${_stations[index].externalID}')));
             setState(() {
               _stations.removeAt(index);
             });
@@ -111,11 +119,13 @@ class _StationsState extends State<Stations> {
             if (errMsg['message'] == null) {
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text(
-                      'Failed to delete station: ${_stations[index].externalID}')));
+                      'Failed to delete station: ${_stations[index]
+                          .externalID}')));
             } else {
               Scaffold.of(context).showSnackBar(SnackBar(
                   content: Text(
-                      'Failed to delete station: ${_stations[index].externalID}\n${errMsg['message']}')));
+                      'Failed to delete station: ${_stations[index]
+                          .externalID}\n${errMsg['message']}')));
             }
             print(resp.body);
           }
@@ -146,16 +156,35 @@ class _StationsState extends State<Stations> {
     }));
   }
 
+  // https://medium.com/@maffan/implementing-pull-to-refresh-in-flutter-59dd31239624
   Widget _buildListView() {
-    return _stations.length != 0
+    if (_displayEmptyList) {
+      return RefreshIndicator(
+        child: ListView(
+          padding: EdgeInsets.all(8),
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 0, vertical: 50),
+              child: ListTile(
+                title: Text('No stations found', textAlign: TextAlign.center),
+                enabled: false,
+              ),
+            )
+          ],
+        ),
+        onRefresh: _populateStations,
+      );
+    }
+
+    return _stations.length != 0 && _displayEmptyList == false
         ? RefreshIndicator(
-            child: ListView.builder(
-              padding: EdgeInsets.all(8),
-              itemCount: _stations.length,
-              itemBuilder: _buildItemsForListView,
-            ),
-            onRefresh: _populateStations,
-          )
+      child: ListView.builder(
+        padding: EdgeInsets.all(8),
+        itemCount: _stations.length,
+        itemBuilder: _buildItemsForListView,
+      ),
+      onRefresh: _populateStations,
+    )
         : Center(child: CircularProgressIndicator());
   }
 
