@@ -92,9 +92,7 @@ class _StationsState extends State<Stations> {
           return await Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) {
             // TODO now the form needs to support being in update mode
-            return StationForm(
-              station: _stations[index],
-            );
+            return StationFormUpdate(station: _stations[index]);
           }));
         }
       },
@@ -204,7 +202,7 @@ class _StationsState extends State<Stations> {
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return StationForm();
+            return StationFormCreate();
           }));
         },
       ),

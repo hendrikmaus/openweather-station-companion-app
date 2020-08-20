@@ -190,7 +190,7 @@ class OpenWeatherMapStationsV3 {
     http.Response resp = await http.put(
         '$baseURI/stations/${station.id}?appid=$apiKey',
         headers: {'Content-Type': 'application/json; charset=utf-8'},
-        body: station.toJson());
+        body: jsonEncode(station.toJson()));
     return resp;
   }
 
