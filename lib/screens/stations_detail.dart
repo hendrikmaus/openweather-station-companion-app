@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:openweathermap_stations_api/screens/stations_form.dart';
 
 import '../openweathermap_stations_v3.dart';
 
@@ -17,6 +18,16 @@ class _StationsDetailState extends State<StationsDetail> {
     return Scaffold(
       appBar: AppBar(
         title: Text(this.widget.station.name),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return StationFormUpdate(station: this.widget.station);
+              }));
+            },
+          )
+        ],
       ),
       body: Container(
         padding: EdgeInsets.all(8),
