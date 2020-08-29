@@ -14,6 +14,15 @@ class StationsDetail extends StatefulWidget {
 class _StationsDetailState extends State<StationsDetail> {
   @override
   Widget build(BuildContext context) {
-    return Container(child: Text(this.widget.station.name),);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(this.widget.station.name),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(8),
+        // TODO the station model does not contain the externally assigned ID
+        child: Text(this.widget.station.toJson().toString()),
+      ),
+    );
   }
 }
