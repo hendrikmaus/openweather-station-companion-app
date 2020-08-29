@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:openweathermap_stations_api/screens/stations_detail.dart';
 import 'package:shared_preferences_settings/shared_preferences_settings.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../openweathermap_stations_v3.dart';
@@ -69,7 +70,12 @@ class _MeasurementsState extends State<Measurements> {
         actions: [
           IconButton(
               icon: Icon(Icons.settings_input_antenna),
-              onPressed: () => print("pressed station details button"))
+              onPressed: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (BuildContext context) {
+                  return StationsDetail(station: this._station);
+                }));
+              })
         ],
       ),
       body: _buildListView(),
