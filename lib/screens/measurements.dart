@@ -66,6 +66,11 @@ class _MeasurementsState extends State<Measurements> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Measurements (${_station.externalID})'),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.settings_input_antenna),
+              onPressed: () => print("pressed station details button"))
+        ],
       ),
       body: _buildListView(),
     );
