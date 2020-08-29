@@ -31,8 +31,7 @@ class _StationsDetailState extends State<StationsDetail> {
       ),
       body: Container(
         padding: EdgeInsets.all(8),
-        // TODO the station model does not contain the externally assigned ID
-        child: Text(this.widget.station.toJson().toString()),
+        child: Text(this.widget.station.id),
       ),
     );
   }
