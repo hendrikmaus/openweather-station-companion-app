@@ -15,7 +15,7 @@ you should probably integrate the API with your systems. For example, I can pict
 
 ## 🔧 Usage
 
-- Build your station (hardware)
+- Build your [station](https://github.com/hendrikmaus/openweather-station) (hardware)
 - Create a station resource using the companion app
 - Retrieve its ID for your micro-controller firmware
 - Deploy
