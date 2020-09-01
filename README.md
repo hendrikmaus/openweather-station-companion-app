@@ -1,6 +1,6 @@
 # 🐴 OpenWeather Station Companion
 
-> A companion app to the [OpenWeather Station API 3.0](https://openweathermap.org/stations) to manage
+> A unofficial companion app to the [OpenWeather Station API 3.0](https://openweathermap.org/stations) to manage
 your own stations and retrieve their measurements.
 
 ## 🔬 Features
